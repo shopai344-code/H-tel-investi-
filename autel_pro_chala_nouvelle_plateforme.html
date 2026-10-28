@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autel pro chala - Plateforme</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Styles de secours : l'interface reste lisible même si le CDN Tailwind ne charge pas */
+.hidden{display:none!important}
+.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.block{display:block}.w-full{width:100%}.min-h-screen{min-height:100vh}
+.flex-col{flex-direction:column}.justify-between{justify-content:space-between}.items-center{align-items:center}.justify-center{justify-content:center}.text-center{text-align:center}
+body{font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#0b1329;color:#f1f5f9;margin:0}
+#app-container{width:100%;max-width:448px;margin:0 auto;overflow-x:hidden}
+#page-login,#page-register{box-sizing:border-box;width:100%;min-height:100vh;padding:28px 20px;gap:28px}
+#page-login>div:first-child,#page-register>div:first-child{display:flex;flex-direction:column;gap:22px;padding-top:12px}
+#page-login .text-center,#page-register .text-center{ text-align:center }
+#page-login h1,#page-register h1{font-size:clamp(27px,7vw,36px);line-height:1.15;margin:10px 0;font-weight:800;letter-spacing:-.04em}
+#page-login p,#page-register p{line-height:1.5}
+#page-login .bg-custom-card,#page-register .bg-custom-card{background:#131c38;padding:20px;border:1px solid #29365f;border-radius:22px;box-sizing:border-box;width:100%;display:flex;flex-direction:column;gap:16px}
+#page-login label,#page-register label{display:block;font-size:13px;font-weight:600;margin-bottom:7px;color:#dbeafe}
+#page-login input,#page-register input,#page-login select,#page-register select{box-sizing:border-box;width:100%;min-width:0;max-width:100%;background:#1a254c;color:#f8fafc;border:1px solid #344575;border-radius:12px;padding:13px 12px;font-size:16px;outline:none}
+#page-login input:focus,#page-register input:focus,#page-login select:focus,#page-register select:focus{border-color:#38bdf8;box-shadow:0 0 0 3px #0284c733}
+#page-login .grid,#page-register .grid{display:grid;grid-template-columns:minmax(105px, .9fr) minmax(0,2fr);gap:8px}
+#page-login button,#page-register button{font-family:inherit;cursor:pointer;border:0;border-radius:12px;padding:13px 16px;font-size:15px;font-weight:700}
+#page-login .bg-primary-custom,#page-register .bg-primary-custom{background:#0284c7;color:white;width:100%;box-shadow:0 5px 14px #0284c733}
+#page-login>p,#page-register>p{margin:0;text-align:center;font-size:14px;color:#aab6d0}
+#page-login>p button,#page-register>p button{background:transparent;color:#38bdf8;padding:8px 4px}
+@media(max-width:360px){#page-login,#page-register{padding:22px 14px}#page-login .bg-custom-card,#page-register .bg-custom-card{padding:15px}#page-login .grid,#page-register .grid{grid-template-columns:105px minmax(0,1fr)}}
+.bg-custom-dark{background:#0b1329}.bg-custom-card{background:#131c38}.bg-custom-card-light{background:#1a254c}
+.border-custom{border-color:#223063}.bg-primary-custom{background:#0284c7}.bg-primary-custom:hover{background:#0369a1}
+@keyframes marquee{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+.animate-marquee{display:flex;flex-direction:column;animation:marquee 15s linear infinite}
+.animate-marquee:hover{animation-play-state:paused}
+
+/* Fenêtre de bienvenue affichée à chaque chargement/réinitialisation de la page */
+#welcome-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(9,10,25,.72);backdrop-filter:blur(5px)}
+#welcome-modal.hidden{display:none!important}
+#welcome-card{width:min(100%,430px);max-height:92vh;overflow:auto;border-radius:28px;background:#fff;color:#24243a;box-shadow:0 24px 70px #0007;text-align:center}
+#welcome-head{background:linear-gradient(135deg,#a56cf0,#7541bd);padding:30px 20px;color:#fff}
+#welcome-logo{width:82px;height:82px;border:2px solid #ffffffcc;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;font-size:21px;font-weight:800;font-style:italic}
+#welcome-body{padding:24px 24px 26px;line-height:1.55}
+#welcome-body h2{font-size:21px;font-weight:800;margin:0 0 12px;color:#25243b}
+#welcome-body p{color:#6b6a7e;margin:0 0 18px}
+#welcome-body .welcome-benefit{text-align:left;margin:13px 0;color:#303044;font-size:15px}
+#welcome-telegram{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;margin-top:22px;padding:15px 12px;border-radius:16px;background:#f2edfc;color:#38245c;text-decoration:none;font-weight:800}
+#top-whatsapp-support{position:fixed;top:12px;right:12px;z-index:10000;display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;background:#075e54;color:#fff;text-decoration:none;font-size:13px;font-weight:800;box-shadow:0 5px 18px #0004}
+#top-whatsapp-support i{font-size:20px}
+@media(max-width:380px){#top-whatsapp-support{top:8px;right:8px;padding:8px 10px;font-size:12px}}
+#welcome-close{width:100%;margin-top:13px;padding:15px;border:0;border-radius:16px;background:linear-gradient(90deg,#a56cf0,#8b50dc);color:white;font-weight:800;font-size:15px;cursor:pointer}
+#welcome-x{float:right;background:transparent;border:0;color:#fff;font-size:25px;cursor:pointer;margin:-14px -5px 0 0}
+
+
+
+/* AUTEL PRO CHALA — identité visuelle premium, ivoire & or champagne */
+:root{--apc-bg:#081521;--apc-panel:#102333;--apc-panel2:#163044;--apc-line:#294456;--apc-gold:#d9b56d;--apc-gold-light:#f5dfaa;--apc-text:#f7f3e9;--apc-muted:#a8bbc5;--apc-teal:#3ba89a}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 15% 0%,#18364a 0%,transparent 38%),radial-gradient(ellipse at 95% 30%,#1c332f 0%,transparent 32%),var(--apc-bg)!important;color:var(--apc-text)!important}
+#app-container{background:transparent!important;isolation:isolate}
+.bg-custom-dark{background:transparent!important}.bg-custom-card{background:linear-gradient(145deg,rgba(20,45,62,.96),rgba(10,28,42,.97))!important}.bg-custom-card-light{background:#183448!important}.border-custom{border-color:var(--apc-line)!important}
+.bg-primary-custom{background:linear-gradient(135deg,var(--apc-gold-light),var(--apc-gold))!important;color:#132331!important;box-shadow:0 8px 24px #d9b56d24;transition:transform .22s ease,box-shadow .22s ease,filter .22s ease}
+#page-login .bg-primary-custom,#page-register .bg-primary-custom{color:#132331!important}
+.text-sky-400,.text-sky-300,.text-cyan-200{color:var(--apc-gold-light)!important}
+#page-login .bg-custom-card,#page-register .bg-custom-card{background:linear-gradient(145deg,#132d3f,#0d2131)!important;border-color:#355064!important;box-shadow:0 22px 65px #0003}
+#page-login input,#page-register input,#page-login select,#page-register select{background:#0d2131!important;border-color:#355064!important;color:#f7f3e9!important;transition:border-color .2s ease,box-shadow .2s ease,background .2s ease}
+#page-login input:focus,#page-register input:focus,#page-login select:focus,#page-register select:focus{border-color:var(--apc-gold)!important;box-shadow:0 0 0 4px #d9b56d24!important}
+#page-login .text-center>div:first-child,#page-register .text-center>div:first-child{background:linear-gradient(135deg,var(--apc-gold-light),#b98a3f)!important;color:#102333!important;box-shadow:0 12px 32px #d9b56d2a;animation:apcFloat 5s ease-in-out infinite}
+#page-login h1,#page-register h1{letter-spacing:-.045em;background:linear-gradient(100deg,#fff9e9 10%,var(--apc-gold-light) 65%,#c69a50);-webkit-background-clip:text;background-clip:text;color:transparent}
+#page-dashboard header{background:rgba(9,27,40,.88)!important;border-color:#294456!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#page-dashboard header .w-10{background:linear-gradient(135deg,var(--apc-gold-light),#b98a3f)!important;color:#102333!important}
+#page-dashboard main>.tab-content>div,#page-dashboard .tab-content>div.bg-custom-card,#page-dashboard #admin-panel{box-shadow:0 12px 32px #0000001c}
+#page-dashboard .rounded-3xl,#page-dashboard .rounded-2xl{transition:border-color .25s ease,box-shadow .25s ease,transform .25s ease}
+#page-dashboard button,.page button,#welcome-close,#welcome-telegram{transition:transform .22s ease,box-shadow .22s ease,filter .22s ease}
+button:hover:not(:disabled),a:hover{filter:brightness(1.08)}
+button:hover:not(:disabled){transform:translateY(-2px)}button:active:not(:disabled){transform:translateY(0) scale(.985)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--apc-gold-light);outline-offset:3px}
+#top-whatsapp-support{background:linear-gradient(135deg,#227f75,#145d58)!important;border:1px solid #78c9b344;box-shadow:0 8px 28px #0004;animation:apcSupportPulse 4s ease-in-out infinite}
+#welcome-modal{background:#06111de0!important;backdrop-filter:blur(12px)!important}
+#welcome-card{background:linear-gradient(145deg,#f8f4e9,#e9e0cd)!important;border:1px solid #d9b56d80;box-shadow:0 30px 100px #0008!important;animation:apcModalIn .55s cubic-bezier(.2,.8,.2,1) both}
+#welcome-head{background:linear-gradient(120deg,#0b2434,#1b3c4b 60%,#9d793e)!important}
+#welcome-logo{border-color:#f5dfaa!important;color:#f5dfaa!important}
+#welcome-close{background:linear-gradient(110deg,#d9b56d,#f1d99f)!important;color:#102333!important;box-shadow:0 8px 20px #a9813d30}
+#welcome-telegram{background:#102b3c!important;color:#f5dfaa!important}
+/* Entrées légères pour les pages et les cartes */
+.page:not(.hidden){animation:apcPageIn .48s cubic-bezier(.2,.7,.2,1) both}
+#page-dashboard .tab-content:not(.hidden)>*{animation:apcRise .55s cubic-bezier(.2,.7,.2,1) both}
+#page-dashboard .tab-content:not(.hidden)>*:nth-child(2){animation-delay:.06s}
+#page-dashboard .tab-content:not(.hidden)>*:nth-child(3){animation-delay:.12s}
+#page-dashboard .tab-content:not(.hidden)>*:nth-child(4){animation-delay:.18s}
+.apc-reveal{opacity:0;transform:translateY(16px);transition:opacity .65s ease,transform .65s cubic-bezier(.2,.7,.2,1)}
+.apc-reveal.apc-visible{opacity:1;transform:translateY(0)}
+@keyframes apcPageIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes apcRise{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+@keyframes apcModalIn{from{opacity:0;transform:translateY(18px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes apcFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes apcSupportPulse{0%,100%{box-shadow:0 8px 28px #0004}50%{box-shadow:0 8px 30px #3ba89a30}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.apc-reveal{opacity:1;transform:none}}
+
+</style>
+
+<style id="autel-white-yellow-android">
+:root{--apc-bg:#fffdf7;--apc-panel:#ffffff;--apc-panel2:#fff8df;--apc-line:#eadcae;--apc-gold:#d9a900;--apc-gold-light:#ffe36e;--apc-text:#29251a;--apc-muted:#756b50;--apc-teal:#b58b00;color-scheme:light}
+html{background:#fffdf7!important;scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background:#fffdf7!important;color:#29251a!important;font-family:'Plus Jakarta Sans',Arial,sans-serif!important}
+.bg-custom-dark,.bg-custom-card,.bg-custom-card-light{background:#fff!important;color:#29251a!important}
+.bg-custom-card{border:1px solid #eadcae!important;box-shadow:0 8px 26px #8f70140d!important}
+.bg-custom-card-light{background:#fff9e6!important}
+.border-custom{border-color:#eadcae!important}
+.text-white,.text-slate-100,.text-slate-200,.text-slate-300,.text-slate-400,.text-slate-500,.text-sky-200,.text-sky-300,.text-sky-400,.text-cyan-200{color:#665a36!important}
+.text-slate-900{color:#29251a!important}
+.bg-primary-custom{background:linear-gradient(135deg,#ffe36e,#d9a900)!important;color:#29251a!important;border:1px solid #d9a900!important;box-shadow:0 5px 16px #d9a90020!important}
+.bg-primary-custom:hover{background:linear-gradient(135deg,#fff0a8,#c99700)!important}
+[class*="bg-indigo-"],[class*="from-indigo-"],[class*="to-slate-900"],[class*="bg-sky-700"]{background-color:#fff4c2!important;color:#29251a!important}
+[class*="border-indigo-"],[class*="border-sky-"]{border-color:#eadcae!important}
+#page-login .bg-custom-card,#page-register .bg-custom-card{background:#fff!important;border-color:#eadcae!important;box-shadow:0 18px 45px #9b7b190f!important}
+#page-login label,#page-register label{color:#665a36!important}
+#page-login input,#page-register input,#page-login select,#page-register select{background:#fffdf7!important;color:#29251a!important;border-color:#dfcf96!important}
+#page-login input:focus,#page-register input:focus,#page-login select:focus,#page-register select:focus{border-color:#d9a900!important;box-shadow:0 0 0 3px #d9a90024!important}
+#page-login .text-center>div:first-child,#page-register .text-center>div:first-child,#page-dashboard header .w-10{background:linear-gradient(135deg,#ffe36e,#d9a900)!important;color:#29251a!important}
+#page-login h1,#page-register h1{background:none!important;color:#29251a!important;-webkit-text-fill-color:#29251a!important}
+#page-dashboard header{background:#ffffffed!important;border-color:#eadcae!important;color:#29251a!important;box-shadow:0 4px 18px #8f70140d!important}
+#page-dashboard header button,#page-dashboard header a{color:#665a36!important}
+#welcome-modal{background:#29251a55!important;backdrop-filter:blur(8px)!important}
+#welcome-card{background:#fffdf7!important;color:#29251a!important;border:1px solid #e4c95b!important}
+#welcome-head{background:linear-gradient(120deg,#fff4bd,#d9a900)!important;color:#29251a!important}
+#welcome-logo{color:#29251a!important;border-color:#d9a900!important}
+#welcome-body h2,#welcome-body p,#welcome-body .welcome-benefit{color:#29251a!important}
+#welcome-close,#welcome-telegram{background:linear-gradient(110deg,#ffe36e,#d9a900)!important;color:#29251a!important}
+#top-whatsapp-support{background:#fff4c2!important;color:#29251a!important;border:1px solid #e0c34d!important}
+button,a,[role="button"],input,select,textarea{touch-action:manipulation}
+button,a,[role="button"]{transition:transform .2s ease,box-shadow .2s ease,background-color .2s ease}
+button:active,[role="button"]:active{transform:scale(.98)}
+img{max-width:100%;height:auto}
+@media(max-width:640px){
+ body{font-size:14px!important}
+ #page-dashboard header{padding-left:12px!important;padding-right:12px!important}
+ #page-dashboard main{padding-left:12px!important;padding-right:12px!important}
+ #page-login,#page-register{padding:14px!important}
+ #page-login .bg-custom-card,#page-register .bg-custom-card{padding:18px!important;border-radius:20px!important}
+ .grid.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ button,input,select,textarea{font-size:16px;min-height:42px}
+ #top-whatsapp-support{top:auto!important;bottom:14px!important;right:12px!important;font-size:12px!important;padding:10px 12px!important;max-width:calc(100vw - 24px)}
+ #welcome-card{width:calc(100vw - 24px)!important;max-height:88dvh!important;border-radius:22px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
+
+</head>
+<body class="bg-custom-dark min-h-screen text-slate-100 flex justify-center">
+<a id="top-whatsapp-support" href="https://t.me/+TNw-XXs9O6cwOWI0" target="_blank" rel="noopener noreferrer" aria-label="Service client Telegram"><i class="fa-brands fa-telegram" aria-hidden="true"></i><span>Service client</span></a>
+
+<div id="welcome-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+ <div id="welcome-card">
+  <div id="welcome-head"><button id="welcome-x" type="button" aria-label="Fermer" onclick="closeWelcomeModal()">×</button><div id="welcome-logo">AUTEL<br>PRO CHALA</div></div>
+  <div id="welcome-body">
+   <h2 id="welcome-title">🎉 Bienvenue sur Autel pro chala !</h2>
+   <p>Votre inscription a été effectuée avec succès. Découvrez les informations utiles pour commencer.</p>
+   <div class="welcome-benefit">🚀 <b>1.</b> Votre compte est maintenant créé.</div>
+   <div class="welcome-benefit">💰 <b>2.</b> Consultez votre solde et les conditions des plans VIP dans votre espace client.</div>
+   <div class="welcome-benefit">🔥 <b>3.</b> Découvrez les offres et actualités de notre plateforme hôtelière.</div>
+   <a id="welcome-telegram" href="https://t.me/apple12342026ok" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Rejoindre le canal Telegram</a>
+   <button id="welcome-close" type="button" onclick="closeWelcomeModal()">J’AI COMPRIS</button>
+  </div>
+ </div>
+</div>
+<script>
+window.showWelcomeModal=function(){const m=document.getElementById('welcome-modal');if(m)m.classList.remove('hidden');};
+window.closeWelcomeModal=function(){const m=document.getElementById('welcome-modal');if(m)m.classList.add('hidden');};
+// La fenêtre de bienvenue s’affiche uniquement après une inscription ou connexion réussie.
+</script>
+
+<div id="app-container" class="w-full max-w-md bg-custom-dark min-h-screen relative shadow-2xl flex flex-col">
+<!-- CONNEXION -->
+<section id="page-login" class="page flex flex-col justify-between p-6 min-h-screen">
+ <div class="space-y-6 pt-8">
+  <div class="text-center space-y-3"><div class="w-20 h-20 mx-auto bg-primary-custom rounded-2xl flex items-center justify-center"><i class="fa-solid fa-hotel text-4xl"></i></div><h1 class="text-3xl font-extrabold">Autel pro chala</h1><p class="text-slate-400 text-sm">Connectez-vous à votre compte</p></div>
+  <div class="bg-custom-card p-6 rounded-3xl border border-custom space-y-4">
+   <div><label class="block text-xs mb-2">Pays & numéro de téléphone</label><div class="grid grid-cols-3 gap-2"><select id="login-country" class="bg-custom-card-light border border-custom rounded-xl px-2 py-3 text-xs"><option value="+225">🇨🇮 Côte d’Ivoire (+225)</option><option value="+226">🇧🇫 Burkina Faso (+226)</option><option value="+223">🇲🇱 Mali (+223)</option><option value="+221">🇸🇳 Sénégal (+221)</option><option value="+227">🇳🇪 Niger (+227)</option><option value="+241">🇬🇦 Gabon (+241)</option><option value="+27">🇿🇦 Afrique du Sud (+27)</option></select><input id="login-phone" type="tel" placeholder="Numéro" class="col-span-2 bg-custom-card-light border border-custom rounded-xl px-3 py-3 text-sm"></div></div>
+   <div><label class="block text-xs mb-2">Mot de passe</label><input id="login-password" type="password" placeholder="Mot de passe" class="w-full bg-custom-card-light border border-custom rounded-xl px-3 py-3 text-sm"></div>
+   <button onclick="handleLogin()" class="w-full bg-primary-custom font-bold py-3.5 rounded-xl">Se connecter</button>
+  </div>
+ </div>
+ <p class="text-center text-sm text-slate-400 pb-6">Pas encore de compte ? <button onclick="switchPage('page-register')" class="text-sky-400 font-bold">S'inscrire</button></p>
+</section>
+<!-- INSCRIPTION -->
+<section id="page-register" class="page hidden flex-col justify-between p-6 min-h-screen">
+ <div class="space-y-5 pt-6">
+  <div class="text-center"><div class="w-16 h-16 mx-auto bg-primary-custom rounded-2xl flex items-center justify-center"><i class="fa-brands fa-apple text-3xl"></i></div><h1 class="text-2xl font-extrabold mt-3">Créer un compte</h1><p id="inviter-banner" class="text-xs text-sky-400 hidden">Parrainé par : <span id="display-inviter"></span></p><p class="text-slate-400 text-xs mt-2">Côte d’Ivoire, Burkina Faso, Mali, Sénégal, Niger, Gabon & Afrique du Sud</p></div>
+  <div class="bg-custom-card p-5 rounded-3xl border border-custom space-y-4">
+   <div><label class="block text-xs mb-1">Pays & numéro de téléphone</label><div class="grid grid-cols-3 gap-2"><select id="reg-country" class="bg-custom-card-light border border-custom rounded-xl px-2 py-3 text-xs"><option value="+225">🇨🇮 Côte d’Ivoire (+225)</option><option value="+226">🇧🇫 Burkina Faso (+226)</option><option value="+223">🇲🇱 Mali (+223)</option><option value="+221">🇸🇳 Sénégal (+221)</option><option value="+227">🇳🇪 Niger (+227)</option><option value="+241">🇬🇦 Gabon (+241)</option><option value="+27">🇿🇦 Afrique du Sud (+27)</option></select><input id="reg-phone" type="tel" placeholder="Votre numéro" class="col-span-2 bg-custom-card-light border border-custom rounded-xl px-3 py-3 text-sm"></div></div>
+   <div><label class="block text-xs mb-1">Mot de passe (min. 6 caractères)</label><input id="reg-password" type="password" placeholder="Minimum 6 caractères" class="w-full bg-custom-card-light border border-custom rounded-xl px-3 py-3 text-sm"></div>
+   <button onclick="handleRegister()" class="w-full bg-primary-custom font-bold py-3.5 rounded-xl">S'inscrire (Bonus 700 FCFA offert)</button>
+  </div>
+ </div>
+ <p class="text-center text-sm text-slate-400 pb-4">Déjà un compte ? <button onclick="switchPage('page-login')" class="text-sky-400 font-bold">Se connecter</button></p>
+</section>
+<!-- TABLEAU DE BORD -->
+<section id="page-dashboard" class="page hidden flex-col min-h-screen pb-20">
+ <header class="bg-custom-card p-4 border-b border-custom flex items-center justify-between sticky top-0 z-30"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-primary-custom rounded-xl flex items-center justify-center"><i class="fa-solid fa-hotel text-xl"></i></div><div><h2 class="font-extrabold text-sm">Autel pro chala</h2><p class="text-[10px] text-slate-400">Espace client</p></div></div><div class="flex gap-2"><button onclick="logout()" class="w-9 h-9 bg-custom-card-light border border-custom rounded-xl text-rose-400"><i class="fa-solid fa-arrow-right-from-bracket"></i></button></div></header>
+ <main class="flex-1 p-4 space-y-4">
+  <div id="tab-accueil" class="tab-content space-y-4">
+   <div class="grid grid-cols-2 gap-3">
+    <div class="p-4 rounded-3xl border" style="background:linear-gradient(145deg,#fffef8,#fff4c2);border-color:#eadcae;box-shadow:0 8px 22px #d9a90012">
+     <p class="text-[10px] uppercase font-bold tracking-wide" style="color:#756b50">Solde investissement</p>
+     <h3 id="user-invest-balance" class="text-xl font-extrabold mt-1" style="color:#29251a">0 FCFA</h3>
+     <p class="text-[9px] mt-1" style="color:#9a8b5c">Réservé aux plans VIP</p>
+     <button onclick="openDepositModal()" class="mt-3 w-full bg-primary-custom font-bold py-2.5 rounded-xl text-xs">Dépôt</button>
+    </div>
+    <div class="p-4 rounded-3xl border" style="background:linear-gradient(145deg,#fffef8,#e8f7ef);border-color:#b8dfc8;box-shadow:0 8px 22px #10b98110">
+     <p class="text-[10px] uppercase font-bold tracking-wide" style="color:#4a6b55">Solde retrait</p>
+     <h3 id="user-withdraw-balance" class="text-xl font-extrabold mt-1" style="color:#29251a">0 FCFA</h3>
+     <p class="text-[9px] mt-1" style="color:#6b8f78">Disponible pour retrait</p>
+     <button onclick="openWithdrawModal()" class="mt-3 w-full font-bold py-2.5 rounded-xl text-xs" style="background:linear-gradient(135deg,#6ee7b7,#10b981);color:#064e3b">Retrait</button>
+    </div>
+   </div>
+   <div class="bg-custom-card p-4 rounded-2xl border border-custom"><h4 class="font-bold text-xs uppercase mb-3"><i class="fa-solid fa-bolt text-amber-400 mr-2"></i>Retraits récents de la communauté</h4><div class="min-h-12 bg-custom-card-light rounded-xl p-2 text-xs text-slate-400" id="community-withdrawals-ticker">Aucun retrait confirmé pour le moment.</div></div>
+   <div id="admin-panel" class="hidden bg-custom-card p-4 rounded-3xl border border-sky-500/50 space-y-4">
+    <h4 class="font-extrabold text-sm text-sky-400 border-b border-custom pb-2"><i class="fa-solid fa-shield-halved mr-2"></i>Tableau de bord administrateur</h4>
+    <div><h5 class="text-xs font-bold uppercase mb-2">Utilisateurs (<span id="admin-users-count">0</span>)</h5><div id="admin-users-list" class="space-y-2 max-h-40 overflow-y-auto"></div></div>
+    <div class="border-t border-custom pt-3 space-y-3">
+     <h5 class="text-xs font-bold uppercase text-sky-300">Suivi des investissements et invitations</h5>
+     <div class="grid grid-cols-3 gap-2">
+      <div class="bg-custom-card-light rounded-xl p-3"><span class="text-[10px] text-slate-400">Ont investi</span><b id="admin-invested-count" class="block text-lg text-emerald-300">0</b></div>
+      <div class="bg-custom-card-light rounded-xl p-3"><span class="text-[10px] text-slate-400">Pas investi</span><b id="admin-not-invested-count" class="block text-lg text-amber-300">0</b></div>
+      <div class="bg-custom-card-light rounded-xl p-3"><span class="text-[10px] text-slate-400">Ont invité</span><b id="admin-inviters-count" class="block text-lg text-sky-300">0</b></div>
+     </div>
+     <div class="flex gap-2 flex-wrap">
+      <button type="button" onclick="showAdminPeople('invested')" class="bg-emerald-700 px-3 py-2 rounded-lg text-xs font-bold">Investisseurs</button>
+      <button type="button" onclick="showAdminPeople('not-invested')" class="bg-amber-700 px-3 py-2 rounded-lg text-xs font-bold">Non-investisseurs</button>
+      <button type="button" onclick="showAdminPeople('inviters')" class="bg-sky-700 px-3 py-2 rounded-lg text-xs font-bold">Parrains actifs</button>
+     </div>
+     <p id="admin-people-description" class="text-[10px] text-slate-400">Choisissez une liste pour consulter les comptes.</p>
+     <div id="admin-people-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+    </div>
+    <div class="border-t border-custom pt-3"><h5 class="text-xs font-bold uppercase mb-2">Dépôts en attente (<span id="admin-deposits-count">0</span>)</h5><div id="admin-deposits-list" class="space-y-2 max-h-48 overflow-y-auto"></div></div>
+    <div class="border-t border-custom pt-3"><h5 class="text-xs font-bold uppercase mb-2">Retraits en attente (<span id="admin-withdrawals-count">0</span>)</h5><div id="admin-withdrawals-list" class="space-y-2 max-h-48 overflow-y-auto"></div></div>
+    <div class="border-t border-custom pt-3"><h5 class="text-xs font-bold uppercase mb-2">Primes de parrainage (<span id="admin-referrals-count">0</span>)</h5><div id="admin-referrals-list" class="space-y-2 max-h-40 overflow-y-auto"></div></div>
+   </div>
+    <div class="bg-custom-card p-4 rounded-2xl border border-custom"><h4 class="font-bold text-sm mb-3">Investissez dans l’hôtellerie de luxe</h4><div class="grid grid-cols-3 gap-2"><div class="bg-custom-card-light p-2 rounded-xl text-center"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=85" alt="Piscine d’hôtel de luxe" class="w-full h-20 object-cover rounded-lg"><span class="text-[11px] font-bold">Resorts de luxe</span></div><div class="bg-custom-card-light p-2 rounded-xl text-center"><img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=500&q=85" alt="Complexe hôtelier de prestige" class="w-full h-20 object-cover rounded-lg"><span class="text-[11px] font-bold">Séjours premium</span></div><div class="bg-custom-card-light p-2 rounded-xl text-center"><img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=500&q=85" alt="Hôtel élégant" class="w-full h-20 object-cover rounded-lg"><span class="text-[11px] font-bold">Hôtels prestigieux</span></div></div></div>
+   <div><h4 class="font-bold text-sm mb-3">Produits d'investissement</h4><div id="home-vip-list" class="space-y-3"></div></div>
+  </div>
+  <div id="tab-investir" class="tab-content hidden space-y-4"><h3 class="font-extrabold">Produits d'investissement</h3><p class="text-xs text-slate-400">Consultez attentivement les conditions et les risques avant tout versement.</p><div id="full-vip-list" class="space-y-3"></div></div>
+  <div id="tab-parrainage" class="tab-content hidden space-y-4">
+   <div class="bg-custom-card p-5 rounded-2xl border border-custom space-y-3 text-center"><i class="fa-solid fa-users text-sky-400 text-2xl"></i><h3 class="font-bold">Niveau d'équipe — LV1 à LV20</h3><p class="text-xs text-slate-400">La commission est calculée sur l'investissement validé du filleul. Elle reste en attente jusqu'à l'approbation de l'administrateur.</p><div class="bg-custom-card-light p-3 rounded-xl border border-custom flex items-center justify-between"><span id="ref-link" class="text-xs text-sky-300 truncate mr-2">Lien personnel</span><button onclick="copyRefLink()" class="bg-primary-custom text-xs px-3 py-2 rounded-lg">Copier</button></div></div>
+   <div class="bg-custom-card p-4 rounded-2xl border border-custom"><h4 class="font-bold text-xs uppercase mb-3">Barème des commissions</h4><div id="referral-levels" class="grid grid-cols-2 gap-2"></div><p class="text-[10px] text-slate-500 mt-3">LV1 : 10 %, LV2 : 3 %, LV3 : 2 %. Les taux LV4 à LV20 sont une proposition décroissante modifiable par l'administrateur.</p></div>
+   <div class="bg-custom-card p-4 rounded-2xl border border-custom"><h4 class="font-bold text-xs uppercase mb-3">Mes filleuls (<span id="referral-count-badge">0</span>)</h4><div class="grid grid-cols-2 gap-2 mb-3"><div class="bg-custom-card-light rounded-xl p-3"><span class="text-[10px] text-slate-400">Commissions en attente</span><b id="my-ref-pending" class="block text-emerald-300">0 FCFA</b></div><div class="bg-custom-card-light rounded-xl p-3"><span class="text-[10px] text-slate-400">Commissions créditées</span><b id="my-ref-approved" class="block text-sky-300">0 FCFA</b></div></div><div id="my-referrals-list" class="space-y-2 text-xs text-slate-400">Aucun filleul enregistré.</div></div>
+  </div>
+  <div id="tab-transactions" class="tab-content hidden space-y-5">
+   <div class="relative overflow-hidden rounded-[28px] p-5 border border-sky-400/20" style="background:radial-gradient(circle at 100% 0%,rgba(34,211,238,.22),transparent 38%),linear-gradient(135deg,#18284d 0%,#101a35 55%,#0b1329 100%);box-shadow:0 18px 45px rgba(0,0,0,.25)">
+    <div class="absolute rounded-full" style="width:150px;height:150px;right:-45px;top:-55px;border:1px solid rgba(103,232,249,.18);box-shadow:0 0 0 18px rgba(103,232,249,.035),0 0 0 38px rgba(103,232,249,.025)"></div>
+    <div class="relative flex items-center justify-between gap-3">
+     <div><div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[.16em] text-cyan-200" style="background:#0e749033;border:1px solid #22d3ee44"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Centre financier</div><h3 class="text-2xl font-extrabold tracking-tight mt-3">Mes dépôts</h3><p class="text-xs text-slate-300 mt-1 max-w-[240px]">Un suivi clair, de l'envoi de la preuve à la décision finale.</p></div>
+     <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-cyan-200 text-2xl" style="background:linear-gradient(145deg,#164e63,#172554);border:1px solid #67e8f944;box-shadow:inset 0 1px #ffffff18"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+    </div>
+    <div class="relative grid grid-cols-3 gap-2 mt-5">
+     <div class="rounded-2xl p-3" style="background:#ffffff08;border:1px solid #ffffff12"><div class="text-[10px] text-slate-400">En attente</div><div id="my-deposits-pending-count" class="text-xl font-extrabold text-amber-300 mt-1">0</div><div class="text-[9px] text-slate-500 mt-1">À vérifier</div></div>
+     <div class="rounded-2xl p-3" style="background:#ffffff08;border:1px solid #ffffff12"><div class="text-[10px] text-slate-400">Acceptés</div><div id="my-deposits-approved-count" class="text-xl font-extrabold text-emerald-300 mt-1">0</div><div class="text-[9px] text-slate-500 mt-1">Confirmés</div></div>
+     <div class="rounded-2xl p-3" style="background:#ffffff08;border:1px solid #ffffff12"><div class="text-[10px] text-slate-400">Refusés</div><div id="my-deposits-rejected-count" class="text-xl font-extrabold text-rose-300 mt-1">0</div><div class="text-[9px] text-slate-500 mt-1">À consulter</div></div>
+    </div>
+   </div>
+   <div class="rounded-2xl p-3 flex gap-2" style="background:#111d38;border:1px solid #293b61">
+    <div class="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center text-sky-300" style="background:#0284c722"><i class="fa-solid fa-shield-halved"></i></div>
+    <div><p class="text-xs font-bold text-slate-200">Validation sécurisée</p><p class="text-[11px] leading-relaxed text-slate-400 mt-1">Ton solde est crédité uniquement après confirmation du paiement par l'administrateur. Les revenus sont contrôlés chaque jour à 00 h 05, heure de Côte d’Ivoire, lorsque le site est actif.</p></div>
+   </div>
+   <div class="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filtrer les dépôts">
+    <button type="button" onclick="filterDepositStatus('all',this)" class="deposit-filter shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold" style="background:#0e7490;color:#ecfeff;border:1px solid #22d3ee66">Tout l'historique</button>
+    <button type="button" onclick="filterDepositStatus('pending',this)" class="deposit-filter shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold" style="background:#17213d;color:#cbd5e1;border:1px solid #334155">En attente</button>
+    <button type="button" onclick="filterDepositStatus('approved',this)" class="deposit-filter shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold" style="background:#17213d;color:#cbd5e1;border:1px solid #334155">Acceptés</button>
+    <button type="button" onclick="filterDepositStatus('rejected',this)" class="deposit-filter shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold" style="background:#17213d;color:#cbd5e1;border:1px solid #334155">Refusés</button>
+   </div>
+   <div id="deposit-empty-state" class="rounded-3xl p-7 text-center" style="background:linear-gradient(145deg,#131f3d,#0f1931);border:1px dashed #3a4a70">
+    <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-2xl text-sky-300" style="background:#0284c71a;border:1px solid #38bdf833"><i class="fa-solid fa-receipt"></i></div>
+    <h4 class="font-extrabold mt-4">Ton historique apparaîtra ici</h4><p class="text-xs text-slate-400 mt-2 leading-relaxed">Lorsque tu effectues un dépôt, tu peux suivre sa validation dans cet espace.</p>
+   </div>
+   <div id="deposit-list-pending" class="deposit-status-panel space-y-3 hidden"><div class="flex items-center gap-2 px-1"><span class="w-2 h-2 rounded-full bg-amber-300"></span><h4 class="text-sm font-extrabold">En attente de validation</h4><span class="text-[10px] text-slate-500 ml-auto">EN COURS</span></div><div id="my-deposits-pending" class="space-y-3"><div class="text-xs text-slate-500">Aucun dépôt en attente.</div></div></div>
+   <div id="deposit-list-approved" class="deposit-status-panel space-y-3 hidden"><div class="flex items-center gap-2 px-1"><span class="w-2 h-2 rounded-full bg-emerald-300"></span><h4 class="text-sm font-extrabold">Paiements acceptés</h4><span class="text-[10px] text-slate-500 ml-auto">CONFIRMÉS</span></div><div id="my-deposits-approved" class="space-y-3"><div class="text-xs text-slate-500">Aucun paiement accepté.</div></div></div>
+   <div id="deposit-list-rejected" class="deposit-status-panel space-y-3 hidden"><div class="flex items-center gap-2 px-1"><span class="w-2 h-2 rounded-full bg-rose-300"></span><h4 class="text-sm font-extrabold">Paiements refusés</h4><span class="text-[10px] text-slate-500 ml-auto">À CONSULTER</span></div><div id="my-deposits-rejected" class="space-y-3"><div class="text-xs text-slate-500">Aucun paiement refusé.</div></div></div>
+   <div class="flex items-center justify-center gap-2 py-2 text-[10px] text-slate-500"><i class="fa-solid fa-bolt text-cyan-400"></i> Données enregistrées localement sur cet appareil</div>
+  </div>
+  <div id="tab-profil" class="tab-content hidden space-y-4">
+   <div class="bg-custom-card p-4 rounded-2xl border border-custom"><h3 id="profile-phone" class="font-bold text-sm">Compte client</h3><p class="text-xs text-emerald-400 mt-1">Compte connecté</p></div>
+   <div class="bg-custom-card p-4 rounded-2xl border border-custom space-y-3"><h4 class="font-bold text-xs uppercase">Portefeuille de retrait</h4><div id="wallet-status" class="text-xs text-slate-400">Aucun portefeuille enregistré.</div><button onclick="openWalletModal()" class="w-full bg-custom-card-light border border-custom text-sky-400 font-bold py-2.5 rounded-xl text-xs">Enregistrer / modifier le portefeuille</button></div>
+   <div class="bg-custom-card p-4 rounded-2xl border border-custom"><h4 class="font-bold text-xs uppercase mb-3">Historique des transactions</h4><div id="transaction-history" class="space-y-2 text-xs text-slate-400">Aucune transaction.</div></div>
+   <div class="bg-custom-card p-4 rounded-2xl border border-custom"><h4 class="font-bold text-xs uppercase mb-3">Mes investissements</h4><div id="my-active-investments" class="space-y-2 text-xs text-slate-400">Aucun investissement actif.</div></div>
+  </div>
+ </main>
+ <nav class="bg-custom-card border-t border-custom py-3 px-6 flex justify-between items-center fixed bottom-0 w-full max-w-md z-30"><button onclick="switchTab('accueil')" data-tab="accueil" class="nav-btn flex flex-col items-center text-sky-400"><i class="fa-solid fa-house"></i><span class="text-[10px] mt-1">Accueil</span></button><button onclick="switchTab('investir')" data-tab="investir" class="nav-btn flex flex-col items-center text-slate-400"><i class="fa-solid fa-chart-pie"></i><span class="text-[10px] mt-1">Investir</span></button><button onclick="switchTab('parrainage')" data-tab="parrainage" class="nav-btn flex flex-col items-center text-slate-400"><i class="fa-solid fa-user-group"></i><span class="text-[10px] mt-1">Parrainage</span></button><button onclick="switchTab('transactions')" data-tab="transactions" class="nav-btn flex flex-col items-center text-slate-400"><i class="fa-solid fa-receipt"></i><span class="text-[10px] mt-1">Dépôts</span></button><button onclick="switchTab('profil')" data-tab="profil" class="nav-btn flex flex-col items-center text-slate-400"><i class="fa-solid fa-user"></i><span class="text-[10px] mt-1">Profil</span></button></nav>
+</section>
+<!-- MODALES -->
+<div id="modal-deposit" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"><div class="bg-custom-card border border-sky-500/30 shadow-2xl shadow-sky-900/30 rounded-3xl p-5 w-full max-w-sm space-y-4 max-h-[90vh] overflow-y-auto"><div class="flex justify-between items-center"><div><p class="text-[10px] uppercase tracking-[.2em] text-sky-400">Paiement sécurisé</p><h3 class="font-extrabold text-lg">Effectuer un dépôt</h3></div><button onclick="closeModal('modal-deposit')" class="rounded-full bg-custom-card-light w-9 h-9">✕</button></div><div id="dep-payment-guide" class="rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-400/15 to-sky-500/10 p-3 space-y-2"><p class="text-sm font-extrabold text-amber-200"><i class="fa-solid fa-circle-exclamation mr-1"></i> Avant de payer, lisez ceci</p><div class="flex items-start gap-2 text-xs text-slate-200"><span class="font-black text-emerald-300">🇨🇮</span><p><strong class="text-emerald-300">Vous êtes en Côte d’Ivoire ?</strong> À l’étape suivante, cliquez directement sur <strong>« Payer directement avec Wave »</strong>, puis vérifiez le montant et le bénéficiaire avant de confirmer.</p></div><div class="flex items-start gap-2 text-xs text-slate-200"><span class="font-black text-sky-300">🌍</span><p><strong class="text-sky-300">Vous êtes dans un autre pays ?</strong> À l’étape suivante, copiez le numéro <strong>0596180495</strong> et le nom <strong>APPLE OF</strong>. Ouvrez votre application de paiement et vérifiez que le transfert vers ce bénéficiaire est bien pris en charge avant d’envoyer l’argent.</p></div><p class="text-[10px] text-slate-400">Après le paiement, revenez sur Apple Of et joignez la capture du reçu. Le dépôt restera en attente jusqu’à sa vérification par l’administrateur.</p></div><p id="dep-step-status" class="text-[11px] text-slate-400">Étape 1 sur 3 — Montant</p><div class="flex gap-2 text-[10px] text-slate-400"><span id="dep-progress-1" class="flex-1 rounded-full h-1 bg-sky-400"></span><span id="dep-progress-2" class="flex-1 rounded-full h-1 bg-slate-700"></span><span id="dep-progress-3" class="flex-1 rounded-full h-1 bg-slate-700"></span></div><div id="dep-step-1" class="space-y-3" style="display:block"><label class="block text-xs font-semibold">Montant à déposer (FCFA)</label><input id="dep-amount" type="number" min="3000" step="1" placeholder="Minimum 3 000 FCFA" class="w-full bg-custom-card-light border border-custom rounded-xl p-3 text-sm"><div class="rounded-2xl border border-sky-500/30 bg-sky-500/10 p-3 text-xs text-slate-300"><p class="font-bold text-sky-300 mb-1"><i class="fa-solid fa-circle-info mr-1"></i>Paiement par Wave</p><p>En Côte d’Ivoire, utilisez le lien de paiement Wave à l’étape suivante. Depuis un autre pays, le numéro peut être copié, mais le transfert n’est possible que si votre service le prend en charge.</p></div><button onclick="goToDepStep2()" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 font-bold p-3 rounded-xl text-sm">Continuer <i class="fa-solid fa-arrow-right ml-1"></i></button></div><div id="dep-step-2" class="hidden space-y-4 text-center" style="display:none"><div class="mx-auto rounded-2xl bg-sky-500/10 border border-sky-500/20 w-16 h-16 flex items-center justify-center text-2xl text-sky-300"><i class="fa-solid fa-wallet"></i></div><h4 class="font-bold">Payez avec Wave</h4><p class="text-xs text-slate-300">Copiez le numéro ci-dessous, ouvrez Wave et saisissez le montant affiché.</p><div class="bg-custom-card-light border border-custom rounded-2xl p-4"><p class="text-[10px] uppercase text-slate-400">Montant de votre dépôt</p><p class="text-2xl font-extrabold text-emerald-400"><span id="dep-final-amount">0</span> FCFA</p><div class="mt-4 rounded-xl border border-custom bg-slate-950/30 p-3"><p class="text-[10px] uppercase text-slate-400">Clients en Côte d’Ivoire</p><a id="wave-payment-link" href="https://pay.wave.com/m/M_ci_M32Pfr2sR-WA/c/ci/" target="_blank" rel="noopener noreferrer" class="mt-2 block w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold p-3 rounded-xl text-sm"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> Payer directement avec Wave</a><p class="text-[10px] text-slate-400 mt-2">Le lien ouvre la page de paiement Wave. Vérifiez le montant et le bénéficiaire avant de confirmer.</p><div class="border-t border-custom my-3 pt-3"><p class="text-[10px] uppercase text-slate-400">Autres pays — numéro à copier (si compatible)</p><p id="wave-payment-number" class="text-lg font-extrabold tracking-wide mt-1">0596180495</p><p class="text-xs text-slate-300 mt-2">Nom du bénéficiaire à copier : <strong>APPLE OF</strong>. Vérifiez aussi le nom réellement affiché dans Wave avant d'envoyer. La compatibilité des transferts depuis les autres pays n'est pas garantie.</p><button type="button" onclick="copyWavePaymentNumber()" class="mt-3 w-full bg-[#1b5cff] hover:bg-blue-700 text-white font-extrabold p-3 rounded-xl text-sm"><i class="fa-solid fa-copy mr-2"></i>Copier le numéro et le nom</button></div></div><p class="text-[10px] text-amber-300"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Le paiement n’est pas confirmé automatiquement. Revenez ici après avoir payé et ajoutez la capture du reçu.</p><button onclick="goToDepStep3()" class="w-full bg-emerald-600 font-bold p-3 rounded-xl text-sm">J'ai payé — continuer</button><button onclick="backToDepStep1()" class="w-full text-xs text-slate-400 p-2">Retour</button></div></div><div id="dep-step-3" class="hidden space-y-3" style="display:none"><div class="text-center"><div class="mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/20 w-14 h-14 flex items-center justify-center text-xl text-emerald-300"><i class="fa-solid fa-receipt"></i></div><h4 class="font-bold mt-2">Confirmez votre paiement</h4><p class="text-xs text-slate-400 mt-1">Ajoutez une capture d'écran claire du reçu de paiement. L'administrateur vérifiera la preuve avant de créditer le solde.</p></div><label class="block text-xs font-semibold">Capture d'écran du paiement <span class="text-rose-400">*</span></label><input id="dep-proof" type="file" accept="image/*" class="w-full text-xs file:mr-3 file:rounded-xl file:border-0 file:bg-sky-600 file:px-3 file:py-2 file:text-white" onchange="previewDepositProof(event)"><div id="dep-proof-preview" class="hidden"><img id="dep-proof-image" alt="Aperçu de la preuve de paiement" class="max-h-48 mx-auto rounded-xl border border-custom"><p class="text-[10px] text-emerald-300 text-center mt-1">Capture ajoutée</p></div><button id="dep-submit-btn" onclick="submitDepositRequest()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 font-bold p-3 rounded-xl text-sm"><i class="fa-solid fa-paper-plane mr-1"></i>Envoyer la demande</button><p class="text-[10px] text-slate-500 text-center">Votre demande restera « en attente » jusqu'à la décision de l'administrateur.</p><button onclick="backToDepStep2()" class="w-full text-xs text-slate-400 p-2">Retour au paiement</button></div></div>
+<div id="modal-withdraw" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"><div class="bg-custom-card border border-custom rounded-3xl p-5 w-full max-w-sm space-y-4"><div class="flex justify-between"><h3 class="font-bold text-sm">Effectuer un retrait (min. 1 000 FCFA)</h3><button onclick="closeModal('modal-withdraw')">✕</button></div><input id="withdraw-amount" type="number" min="1000" placeholder="Montant" class="w-full bg-custom-card-light border border-custom rounded-xl p-3 text-sm"><button onclick="processWithdraw()" class="w-full bg-primary-custom font-bold p-3 rounded-xl text-sm">Confirmer le retrait</button></div></div>
+<div id="modal-wallet" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"><div class="bg-custom-card border border-custom rounded-3xl p-5 w-full max-w-sm space-y-4"><div class="flex justify-between"><h3 class="font-bold text-sm">Portefeuille de retrait</h3><button onclick="closeModal('modal-wallet')">✕</button></div><select id="wallet-op" class="w-full bg-custom-card-light border border-custom rounded-xl p-3 text-sm"><option value="WAVE">WAVE</option><option value="MTN">MTN</option></select><input id="wallet-phone" type="tel" placeholder="Numéro du portefeuille" class="w-full bg-custom-card-light border border-custom rounded-xl p-3 text-sm"><button onclick="saveWallet()" class="w-full bg-primary-custom font-bold p-3 rounded-xl text-sm">Enregistrer</button></div></div>
+</div>
+<script>
+/* AUTEL PRO CHALA — plateforme 100% locale (localStorage). Pas de Firebase/Supabase. Base vide = nouvelle plateforme. */
+const STORAGE_KEY = "apc_platform_v2";
+const WAVE_PAYMENT_NUMBER = "0596180495";
+const WAVE_PAYMENT_LINK = "https://pay.wave.com/m/M_ci_M32Pfr2sR-WA/c/ci/";
+const ADMIN_PHONE = "+225 0596180495";
+const ADMIN_PASSWORD = "Moussa99";
+const vipPlans = [
+{id:1,name:"VIP Essentiel",price:3000,daily:750,total:45000,days:60,img:"https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=700&q=85",available:true,badge:"Starter"},
+{id:2,name:"VIP Découverte",price:5000,daily:1200,total:72000,days:60,img:"https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=700&q=85",available:true,badge:"Populaire"},
+{id:3,name:"VIP Plus",price:10000,daily:2500,total:150000,days:60,img:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=700&q=85",available:true,badge:"Boost"},
+{id:4,name:"VIP Premium",price:20000,daily:5000,total:300000,days:60,img:"https://images.unsplash.com/photo-1519449556851-5720b33024e7?auto=format&fit=crop&w=700&q=85",available:true,badge:"Premium"},
+{id:5,name:"VIP Gold",price:50000,daily:12000,total:720000,days:60,img:"https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=700&q=85",available:true,badge:"Gold"},
+{id:6,name:"VIP Platinum",price:100000,daily:25000,total:1500000,days:60,img:"https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=700&q=85",available:true,badge:"Elite"},
+{id:7,name:"VIP Prestige",price:200000,daily:50000,total:3000000,days:60,img:"https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=700&q=85",available:false,badge:"Prestige"},
+{id:8,name:"VIP Excellence",price:400000,daily:100000,total:6000000,days:60,img:"https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=700&q=85",available:false,badge:"Excellence"}
+];
+const referralRates=[10,3,2,1.8,1.6,1.5,1.4,1.3,1.2,1.1,1.0,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1];
+let currentUser=null, selectedOp="WAVE", tempDepositAmount=0, currentInviter=null, adminPanelActive=false;
+const $=id=>document.getElementById(id);
+const money=n=>Number(n||0).toLocaleString("fr-FR");
+const today=()=>new Date().toLocaleDateString("fr-FR");
+const uid=()=>crypto.randomUUID?crypto.randomUUID():String(Date.now())+"_"+Math.random().toString(36).slice(2);
+function emptyDB(){return{users:{},deposits:[],withdrawals:[],referrals:[],community_withdrawals:[],version:2,createdAt:Date.now()};}
+function loadDB(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw){const db=emptyDB();saveDB(db);return db;}const db=JSON.parse(raw);db.users=db.users||{};db.deposits=Array.isArray(db.deposits)?db.deposits:[];db.withdrawals=Array.isArray(db.withdrawals)?db.withdrawals:[];db.referrals=Array.isArray(db.referrals)?db.referrals:[];db.community_withdrawals=Array.isArray(db.community_withdrawals)?db.community_withdrawals:[];return db;}catch(e){const db=emptyDB();saveDB(db);return db;}}
+function saveDB(db){localStorage.setItem(STORAGE_KEY,JSON.stringify(db));}
+function getUser(phone){const db=loadDB();return db.users[phone]?{...db.users[phone]}:null;}
+function setUser(phone,data){const db=loadDB();db.users[phone]=data;saveDB(db);}
+function appendTx(user,item){return[...(Array.isArray(user.transactions)?user.transactions:[]),{...item,date:today()}];}
+async function hashPassword(value){const bytes=new TextEncoder().encode(value);const digest=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");}
+function cleanPhone(country,raw){return country+" "+raw.trim().replace(/\s+/g,"");}
+function safeAmount(v){const n=Number(v);if(!Number.isSafeInteger(n)||n<=0)throw new Error("Montant invalide.");return n;}
+window.addEventListener("DOMContentLoaded",()=>{loadDB();renderVipLists();renderReferralLevels();const ref=new URLSearchParams(location.search).get("ref");if(ref){currentInviter=ref;$("display-inviter").textContent=ref;$("inviter-banner").classList.remove("hidden");}});
+function renderReferralLevels(){const el=$("referral-levels");if(!el)return;el.innerHTML=referralRates.map((rate,i)=>`<div class="bg-custom-card-light border border-custom rounded-xl p-3 flex items-center justify-between"><span class="text-xs font-bold">LV${i+1}</span><b class="text-sky-300">${String(rate).replace(".",",")}%</b></div>`).join("");}
+function renderVipLists(){
+ const markup=vipPlans.map(v=>{
+  const roi=Math.round((v.total/v.price)*100);
+  const dailyPct=((v.daily/v.price)*100).toFixed(1).replace(".",",");
+  return `<article class="vip-card relative overflow-hidden bg-custom-card p-0 rounded-3xl border border-custom ${v.available?'':'opacity-85'}" style="box-shadow:0 10px 28px #d9a90012">
+   <div class="relative"><img src="${v.img}" alt="${v.name}" class="w-full h-28 object-cover"><div class="absolute inset-0" style="background:linear-gradient(to top,#fffdf7 0%,transparent 55%)"></div>
+    <span class="absolute top-3 left-3 text-[10px] font-extrabold uppercase tracking-wide px-2.5 py-1 rounded-full" style="background:linear-gradient(135deg,#ffe36e,#d9a900);color:#29251a">${v.badge||("VIP "+v.id)}</span>
+    ${v.available?'':'<span class="absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300"><i class="fa-solid fa-lock mr-1"></i>Bientôt</span>'}
+   </div>
+   <div class="p-4 space-y-3 -mt-4 relative">
+    <div><h4 class="font-extrabold text-base" style="color:#29251a">${v.name}</h4><p class="text-[11px] mt-0.5" style="color:#756b50">Rendement ~${dailyPct}% / jour · ${v.days} jours</p></div>
+    <div class="grid grid-cols-3 gap-2 text-center">
+     <div class="rounded-xl p-2" style="background:#fff9e6;border:1px solid #eadcae"><p class="text-[9px] uppercase font-bold" style="color:#756b50">Quotidien</p><b class="text-sm block mt-0.5" style="color:#b58b00">${money(v.daily)}</b></div>
+     <div class="rounded-xl p-2" style="background:#fff9e6;border:1px solid #eadcae"><p class="text-[9px] uppercase font-bold" style="color:#756b50">Total</p><b class="text-sm block mt-0.5" style="color:#29251a">${money(v.total)}</b></div>
+     <div class="rounded-xl p-2" style="background:#fff9e6;border:1px solid #eadcae"><p class="text-[9px] uppercase font-bold" style="color:#756b50">ROI</p><b class="text-sm block mt-0.5" style="color:#b58b00">${roi}%</b></div>
+    </div>
+    <div class="flex items-center justify-between gap-3 pt-1">
+     <div><p class="text-[9px] uppercase font-bold" style="color:#756b50">Investissement</p><b class="text-lg font-extrabold" style="color:#29251a">${money(v.price)} <span class="text-xs font-bold">FCFA</span></b></div>
+     ${v.available?`<button onclick="investVip(${v.id})" class="bg-primary-custom px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm">Investir</button>`:`<button disabled class="px-4 py-2.5 rounded-xl text-xs font-bold cursor-not-allowed" style="background:#f0e9d0;color:#9a8b5c;border:1px solid #eadcae"><i class="fa-solid fa-lock mr-1"></i>Verrouillé</button>`}
+    </div>
+   </div></article>`;
+ }).join("");
+ if($("home-vip-list"))$("home-vip-list").innerHTML=markup;
+ if($("full-vip-list"))$("full-vip-list").innerHTML=markup;
+}
+window.switchPage=function(id){document.querySelectorAll(".page").forEach(e=>{e.classList.add("hidden");e.classList.remove("flex");});$(id).classList.remove("hidden");$(id).classList.add("flex");};
+window.switchTab=function(name){document.querySelectorAll(".tab-content").forEach(e=>e.classList.add("hidden"));$("tab-"+name).classList.remove("hidden");document.querySelectorAll(".nav-btn").forEach(b=>{b.classList.toggle("text-sky-400",b.dataset.tab===name);b.classList.toggle("text-slate-400",b.dataset.tab!==name);});};
+window.handleRegister=async function(){
+ const phone=cleanPhone($("reg-country").value,$("reg-phone").value), password=$("reg-password").value;
+ if(!$("reg-phone").value.trim()||password.length<6){alert("Saisissez un numéro et un mot de passe d'au moins 6 caractères.");return;}
+ try{
+  if(getUser(phone)){alert("Ce numéro est déjà enregistré. Connectez-vous.");return;}
+  const user={phone,passwordHash:await hashPassword(password),investBalance:0,withdrawBalance:700,wallet:null,invitedBy:currentInviter||null,hasInvested:false,activeInvestments:[],transactions:[{type:"Bonus de bienvenue",amount:700,date:today()}]};
+  setUser(phone,user);
+  if(currentInviter){const db=loadDB();db.referrals.push({id:"ref_"+uid(),parrain:currentInviter,filleul:phone,invested:false,pendingReward:false,date:today()});saveDB(db);}
+  currentUser=user;afterLogin(phone);showWelcomeModal();
+ }catch(e){console.error(e);alert("Inscription impossible : "+(e.message||"erreur locale."));}
+};
+window.handleLogin=async function(){
+ const raw=$("login-phone").value.trim().replace(/\s+/g,""); const country=$("login-country").value; const password=$("login-password").value;
+ if(!raw||!password){alert("Remplissez tous les champs.");return;}
+ const digits=raw.replace(/[^\d+]/g,"");
+ let phone; if(digits.startsWith(country)) phone=country+" "+digits.slice(country.length).replace(/^\s+/,""); else if(digits.startsWith("+")) phone=country+" "+digits.replace(/^\+\d+/,""); else phone=country+" "+digits;
+ try{
+  if(phone===ADMIN_PHONE && password===ADMIN_PASSWORD){
+   let admin=getUser(ADMIN_PHONE);
+   if(!admin) admin={phone:ADMIN_PHONE,passwordHash:await hashPassword(ADMIN_PASSWORD),role:"admin",investBalance:0,withdrawBalance:0,wallet:{op:"WAVE",phone:"0596180495"},invitedBy:null,hasInvested:true,activeInvestments:[],transactions:[]};
+   else {admin.role="admin";admin.passwordHash=await hashPassword(ADMIN_PASSWORD);}
+   setUser(ADMIN_PHONE,admin); currentUser=admin; afterLogin(ADMIN_PHONE); showWelcomeModal(); alert("Connexion administrateur réussie."); return;
+  }
+  const user=getUser(phone);
+  if(!user){alert("Compte introuvable. Vérifiez le pays et le numéro, ou inscrivez-vous.");return;}
+  const submittedHash=await hashPassword(password);
+  if(user.passwordHash!==submittedHash && user.password!==password){alert("Mot de passe incorrect.");return;}
+  currentUser=user; afterLogin(phone); showWelcomeModal();
+ }catch(e){console.error(e);alert("Connexion impossible : "+(e.message||"erreur."));}
+};
+window.logout=function(){currentUser=null;adminPanelActive=false;switchPage("page-login");};
+function afterLogin(phone){
+ $("profile-phone").textContent=phone;
+ $("ref-link").textContent=location.origin+location.pathname+"?ref="+encodeURIComponent(phone);
+ switchPage("page-dashboard"); switchTab("accueil"); refreshAllUI();
+ if(phone===ADMIN_PHONE||currentUser?.role==="admin"){$("admin-panel").classList.remove("hidden");initAdminPanel();}
+ else $("admin-panel").classList.add("hidden");
+}
+function refreshAllUI(){
+ if(!currentUser)return;
+ const fresh=getUser(currentUser.phone); if(fresh) currentUser=fresh;
+ updateDashboardUI(); refreshMyDeposits(); refreshMyReferrals(); refreshCommunityWithdrawals();
+ if(currentUser.phone===ADMIN_PHONE||currentUser.role==="admin") initAdminPanel();
+}
+function updateDashboardUI(){
+ if(!currentUser)return;
+ $("user-invest-balance").textContent=money(currentUser.investBalance)+" FCFA";
+ $("user-withdraw-balance").textContent=money(currentUser.withdrawBalance)+" FCFA";
+ $("wallet-status").textContent=currentUser.wallet?`${currentUser.wallet.op} : ${currentUser.wallet.phone}`:"Aucun portefeuille enregistré.";
+ $("transaction-history").innerHTML=(currentUser.transactions||[]).slice().reverse().map(t=>`<div class="bg-custom-card-light p-2 rounded-xl border border-custom flex justify-between gap-2"><span>${t.type}<small class="block text-slate-400">${t.date||""}</small></span><b class="${Number(t.amount)>=0?"text-emerald-400":"text-rose-400"}">${Number(t.amount)>0?"+":""}${money(t.amount)} FCFA</b></div>`).join("")||"Aucune transaction.";
+ const investments=currentUser.activeInvestments||[];
+ const totalDaily=investments.reduce((s,v)=>s+(Number(v.daily)||0),0);
+ const totalEarned=investments.reduce((s,v)=>s+(Number(v.daily)||0)*(Number(v.paidDays)||0),0);
+ const totalLeft=investments.reduce((s,v)=>s+Math.max(0,(Number(v.days)||0)-(Number(v.paidDays)||0)),0);
+ const fmt=d=>{const a=new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Abidjan",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);const p=Object.fromEntries(a.filter(x=>x.type!=="literal").map(x=>[x.type,x.value]));return `${p.year}-${p.month}-${p.day}`;};
+ $("my-active-investments").innerHTML=`<section class="rounded-[26px] p-4 mb-3" style="background:linear-gradient(135deg,#fff9e6,#fff4c2);border:1px solid #eadcae"><div class="text-[10px] uppercase font-bold" style="color:#b58b00">Centre de rendement</div><div class="text-2xl font-extrabold mt-2" style="color:#29251a">${money(totalDaily)} <span class="text-xs" style="color:#756b50">FCFA / jour</span></div><div class="grid grid-cols-2 gap-2 mt-4"><div class="rounded-xl p-3" style="background:#fff"><div class="text-[10px]" style="color:#756b50">Revenus crédités</div><b style="color:#b58b00">${money(totalEarned)} FCFA</b></div><div class="rounded-xl p-3" style="background:#fff"><div class="text-[10px]" style="color:#756b50">Jours restants</div><b>${totalLeft} jours</b></div></div></section>`+(investments.map(v=>{
+  const days=Number(v.days)||0,paid=Math.min(days,Number(v.paidDays)||0),remaining=Math.max(0,days-paid),pct=days?Math.min(100,paid/days*100):0;
+  const todayStr=fmt(new Date()); const purchaseDay=Number(v.purchasedAt)?fmt(new Date(Number(v.purchasedAt))):"";
+  const canClaim=remaining>0&&purchaseDay&&todayStr>purchaseDay&&v.lastClaimDate!==todayStr;
+  return `<article class="rounded-2xl p-3 mb-3" style="background:#fff;border:1px solid #eadcae"><div class="flex items-center gap-3"><img src="${v.img||''}" class="w-14 h-14 rounded-xl object-cover"><div class="min-w-0 flex-1"><span class="text-[9px] font-extrabold rounded-md px-2 py-1" style="background:#fff4c2;color:#b58b00">VIP ${v.id}</span><b class="block text-sm mt-1 truncate">${v.name}</b><p class="text-[11px] mt-1" style="color:#b58b00">+${money(Number(v.daily)||0)} FCFA / jour</p></div></div>
+  <div class="grid grid-cols-3 gap-2 mt-3 text-center"><div><p class="text-[9px]" style="color:#756b50">Prix</p><b class="text-xs">${money(Number(v.price)||0)}</b></div><div><p class="text-[9px]" style="color:#756b50">Crédités</p><b class="text-xs">${paid}/${days}</b></div><div><p class="text-[9px]" style="color:#756b50">Reste</p><b class="text-xs">${remaining} j</b></div></div>
+  <div class="h-1.5 rounded-full mt-3 overflow-hidden" style="background:#eadcae55"><div class="h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#ffe36e,#d9a900)"></div></div>
+  ${canClaim?`<button type="button" onclick="claimVipDailyReward('${String(v.id)}')" class="w-full mt-3 rounded-xl px-4 py-3 text-xs font-extrabold bg-primary-custom"><i class="fa-solid fa-hand-holding-dollar mr-1"></i> Réclamer ${money(Number(v.daily)||0)} FCFA</button>`:remaining>0?`<button disabled class="w-full mt-3 rounded-xl px-4 py-3 text-xs font-bold" style="background:#f0e9d0;color:#9a8b5c">Reviens demain</button>`:`<button disabled class="w-full mt-3 rounded-xl px-4 py-3 text-xs font-bold" style="background:#f0e9d0;color:#9a8b5c">Plan terminé</button>`}</article>`;
+ }).join("")||'<div class="rounded-2xl p-6 text-center" style="border:1px dashed #eadcae"><b>Aucun investissement actif</b></div>');
+}
+function refreshMyDeposits(){
+ if(!currentUser)return; const db=loadDB();
+ const mine=db.deposits.filter(d=>d.phone===currentUser.phone).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+ const groups={pending:{box:"my-deposits-pending",count:"my-deposits-pending-count",label:"En attente",empty:"Aucun dépôt en attente."},approved:{box:"my-deposits-approved",count:"my-deposits-approved-count",label:"Accepté",empty:"Aucun paiement accepté."},rejected:{box:"my-deposits-rejected",count:"my-deposits-rejected-count",label:"Refusé",empty:"Aucun paiement refusé."}};
+ for(const [status,meta] of Object.entries(groups)){const rows=mine.filter(d=>d.status===status);if($(meta.count))$(meta.count).textContent="("+rows.length+")";if($(meta.box))$(meta.box).innerHTML=rows.map(d=>`<article data-deposit-row class="rounded-2xl p-4" style="background:#fff;border:1px solid #eadcae"><div class="flex justify-between"><span class="text-xs font-bold">${meta.label}</span><b>${money(Number(d.amount)||0)} FCFA</b></div><p class="text-[10px] mt-1" style="color:#756b50">${d.date||""}</p>${d.reason?`<p class="text-xs text-rose-500 mt-1">${d.reason}</p>`:""}</article>`).join("")||meta.empty;}
+ const empty=$("deposit-empty-state"); if(empty) empty.classList.toggle("hidden",mine.length>0);
+}
+window.filterDepositStatus=function(status,button){const panels={pending:$("deposit-list-pending"),approved:$("deposit-list-approved"),rejected:$("deposit-list-rejected")};document.querySelectorAll(".deposit-filter").forEach(b=>{b.style.background="#17213d";b.style.color="#cbd5e1";});if(button){button.style.background="#0e7490";button.style.color="#ecfeff";}Object.entries(panels).forEach(([key,panel])=>{if(panel)panel.classList.toggle("hidden",status!=="all"&&status!==key);});};
+function refreshMyReferrals(){
+ if(!currentUser)return; const db=loadDB(); const rows=db.referrals.filter(r=>r.parrain===currentUser.phone);
+ const pending=rows.filter(r=>r.commissionStatus==="pending"&&r.pendingReward).reduce((a,r)=>a+(Number(r.commissionAmount)||0),0);
+ const approved=rows.filter(r=>r.commissionStatus==="approved"||r.commissionApproved).reduce((a,r)=>a+(Number(r.commissionAmount)||0),0);
+ if($("my-ref-pending"))$("my-ref-pending").textContent=money(pending)+" FCFA";
+ if($("my-ref-approved"))$("my-ref-approved").textContent=money(approved)+" FCFA";
+ if($("referral-count-badge"))$("referral-count-badge").textContent=new Set(rows.map(r=>r.filleul).filter(Boolean)).size;
+ if($("my-referrals-list"))$("my-referrals-list").innerHTML=rows.map(r=>`<div class="bg-custom-card-light p-3 rounded-xl border border-custom"><b>${r.filleul||"Filleul"}</b> LV${Number(r.level)||1}<span class="block text-slate-400 mt-1">${r.commissionAmount!=null?money(Number(r.commissionAmount)||0)+" FCFA":"En attente"}</span></div>`).join("")||"Aucun filleul enregistré.";
+}
+function refreshCommunityWithdrawals(){
+ const db=loadDB(); const rows=(db.community_withdrawals||[]).slice().sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)).slice(0,15);
+ if($("community-withdrawals-ticker"))$("community-withdrawals-ticker").innerHTML=rows.map(w=>`<div class="flex justify-between gap-2 py-1 border-b border-custom/50"><span>${String(w.phone||"").replace(/(\d{2})\d+(\d{2})/,"$1****$2")} (${w.op||"WAVE"})</span><b class="text-emerald-400">${money(w.amount)} FCFA</b></div>`).join("")||"Aucun retrait confirmé pour le moment.";
+}
+let adminPeopleCache={invested:[],"not-invested":[],inviters:[]};
+window.showAdminPeople=function(kind){
+ const descriptions={invested:"Comptes avec investissement.","not-invested":"Comptes sans investissement.",inviters:"Parrains actifs."};
+ const rows=adminPeopleCache[kind]||[];
+ $("admin-people-description").textContent=(descriptions[kind]||"")+` Total : ${rows.length}`;
+ $("admin-people-list").innerHTML=rows.map(u=>`<article class="bg-custom-card-light p-3 rounded-xl border border-custom text-xs"><b>${u.phone||"—"}</b><p class="text-slate-400">Parrain : ${u.invitedBy||"Aucun"}</p></article>`).join("")||'<p class="text-slate-400 text-xs">Aucun compte.</p>';
+};
+function initAdminPanel(){
+ const db=loadDB(); const users=Object.values(db.users);
+ $("admin-users-count").textContent=users.length;
+ $("admin-users-list").innerHTML=users.map(u=>{const total=Number(u.investBalance??0)+Number(u.withdrawBalance??0);return `<div class="bg-custom-card-light p-2 rounded-xl border border-custom text-xs flex justify-between gap-2"><span>${u.phone}</span><b class="text-emerald-400">${money(total)} FCFA</b></div>`;}).join("")||"Aucun utilisateur";
+ const invested=users.filter(u=>(u.activeInvestments||[]).length>0||u.hasInvested===true);
+ const notInvested=users.filter(u=>!((u.activeInvestments||[]).length>0||u.hasInvested===true));
+ const inviters=users.filter(u=>users.some(v=>v.invitedBy===u.phone));
+ adminPeopleCache={invested, "not-invested":notInvested, inviters};
+ $("admin-invested-count").textContent=invested.length; $("admin-not-invested-count").textContent=notInvested.length; $("admin-inviters-count").textContent=inviters.length;
+ if(!$("admin-people-list").dataset.initialized){$("admin-people-list").dataset.initialized="1";showAdminPeople("invested");}
+ const pendDep=db.deposits.filter(d=>d.status==="pending"); $("admin-deposits-count").textContent=pendDep.length;
+ $("admin-deposits-list").innerHTML=pendDep.map(d=>`<div class="bg-custom-card-light p-3 rounded-xl border border-custom text-xs space-y-2"><div class="flex justify-between"><b>${d.phone}</b><b class="text-sky-400">+${money(d.amount)} FCFA</b></div>${d.proofData?`<a href="${d.proofData}" target="_blank" class="text-sky-300 underline">Voir capture</a><img src="${d.proofData}" class="max-h-40 rounded-lg border mx-auto">`:""}<div class="flex gap-2"><button onclick="adminValidateDeposit('${d.id}')" class="flex-1 bg-emerald-600 p-2 rounded-lg text-white">Valider</button><button onclick="adminRejectDeposit('${d.id}')" class="flex-1 bg-rose-600 p-2 rounded-lg text-white">Refuser</button></div></div>`).join("")||'<p class="text-slate-400">Aucun dépôt en attente.</p>';
+ const pendW=db.withdrawals.filter(d=>d.status==="pending"); $("admin-withdrawals-count").textContent=pendW.length;
+ $("admin-withdrawals-list").innerHTML=pendW.map(d=>`<div class="bg-custom-card-light p-3 rounded-xl border border-custom text-xs space-y-2"><div class="flex justify-between"><b>${d.phone}</b><b class="text-rose-400">-${money(d.amount)} FCFA</b></div><div class="flex gap-2"><button onclick="adminValidateWithdrawal('${d.id}')" class="flex-1 bg-emerald-600 p-2 rounded-lg text-white">Valider</button><button onclick="adminRejectWithdrawal('${d.id}')" class="flex-1 bg-rose-600 p-2 rounded-lg text-white">Rejeter</button></div></div>`).join("")||'<p class="text-slate-400">Aucun retrait en attente.</p>';
+ const pendR=db.referrals.filter(d=>d.pendingReward&&!d.commissionApproved); $("admin-referrals-count").textContent=pendR.length;
+ $("admin-referrals-list").innerHTML=pendR.map(d=>`<div class="bg-custom-card-light p-3 rounded-xl border border-custom text-xs space-y-2"><p>Parrain : ${d.parrain}</p><p>Filleul : ${d.filleul}</p><p>Commission : <b class="text-amber-300">${money(Number(d.commissionAmount)||0)} FCFA</b></p><button onclick="adminValidateReferralReward('${d.id}')" class="w-full bg-emerald-600 p-2 rounded-lg text-white">Approuver</button><button onclick="adminRejectReferralReward('${d.id}')" class="w-full bg-rose-700 p-2 rounded-lg text-white">Refuser</button></div>`).join("")||'<p class="text-slate-400">Aucune commission en attente.</p>';
+}
+window.adminValidateDeposit=function(depId){const db=loadDB();const d=db.deposits.find(x=>x.id===depId);if(!d||d.status!=="pending"){alert("Déjà traité.");return;}const u=db.users[d.phone];if(!u){alert("Compte introuvable.");return;}const amount=Number(d.amount);u.investBalance=Number(u.investBalance||0)+amount;u.transactions=appendTx(u,{type:"Dépôt validé",amount});d.status="approved";d.processedAt=Date.now();saveDB(db);alert(`Dépôt ${money(amount)} FCFA validé.`);refreshAllUI();};
+window.adminRejectDeposit=function(depId){const db=loadDB();const d=db.deposits.find(x=>x.id===depId);if(!d||d.status!=="pending"){alert("Déjà traité.");return;}d.status="rejected";d.reason="Paiement non confirmé";d.processedAt=Date.now();saveDB(db);alert("Dépôt rejeté.");refreshAllUI();};
+window.adminValidateWithdrawal=function(id){const db=loadDB();const w=db.withdrawals.find(x=>x.id===id);if(!w||w.status!=="pending"){alert("Déjà traité.");return;}w.status="approved";w.processedAt=Date.now();db.community_withdrawals.push({phone:w.phone,amount:w.amount,op:w.op||"WAVE",timestamp:Date.now()});saveDB(db);alert(`Retrait ${money(w.amount)} FCFA validé.`);refreshAllUI();};
+window.adminRejectWithdrawal=function(id){const reason=prompt("Motif :");if(reason===null)return;const db=loadDB();const w=db.withdrawals.find(x=>x.id===id);if(!w||w.status!=="pending"){alert("Déjà traité.");return;}const u=db.users[w.phone];if(!u){alert("Compte introuvable.");return;}const amount=Number(w.amount);u.withdrawBalance=Number(u.withdrawBalance||0)+amount;u.transactions=appendTx(u,{type:`Retrait rejeté (${reason||"—"})`,amount});w.status="rejected";w.processedAt=Date.now();saveDB(db);alert("Retrait rejeté, montant remboursé.");refreshAllUI();};
+window.adminValidateReferralReward=function(id){const db=loadDB();const r=db.referrals.find(x=>x.id===id);if(!r||!r.pendingReward||r.commissionApproved){alert("Déjà traité.");return;}const u=db.users[r.parrain];if(!u){alert("Parrain introuvable.");return;}const amount=Number(r.commissionAmount)||0;u.withdrawBalance=Number(u.withdrawBalance||0)+amount;u.transactions=appendTx(u,{type:`Commission LV${r.level||1}`,amount});r.pendingReward=false;r.commissionApproved=true;r.commissionStatus="approved";saveDB(db);alert("Commission créditée.");refreshAllUI();};
+window.adminRejectReferralReward=function(id){const reason=prompt("Motif :");if(reason===null)return;const db=loadDB();const r=db.referrals.find(x=>x.id===id);if(!r||!r.pendingReward){alert("Déjà traité.");return;}r.pendingReward=false;r.commissionApproved=false;r.commissionStatus="rejected";saveDB(db);alert("Commission refusée.");refreshAllUI();};
+function getReferralUpline(startPhone,maxLevels=20){const chain=[],seen=new Set();let next=startPhone||null;const db=loadDB();while(next&&chain.length<maxLevels){const n=String(next).trim();if(!n||seen.has(n))break;seen.add(n);const data=db.users[n];if(!data)break;if(n===currentUser?.phone)break;chain.push({phone:n,invitedBy:data.invitedBy||null});next=data.invitedBy||null;}return chain;}
+window.investVip=function(id){
+ if(!currentUser){alert("Connectez-vous d'abord.");return;}
+ const vip=vipPlans.find(v=>v.id===id);if(!vip)return;if(!vip.available){alert("Bientôt disponible.");return;}
+ try{
+  const db=loadDB();const u=db.users[currentUser.phone];if(!u)throw new Error("Compte introuvable.");
+  if(Number(u.investBalance||0)<vip.price)throw new Error("Solde d'investissement insuffisant. Effectuez un dépôt.");
+  const upline=getReferralUpline(u.invitedBy,20);const investmentId=uid();
+  u.investBalance=Number(u.investBalance)-vip.price;
+  u.activeInvestments=[...(u.activeInvestments||[]),{...vip,investmentId,purchasedAt:Date.now(),paidDays:0}];
+  u.transactions=appendTx(u,{type:`Investissement ${vip.name}`,amount:-vip.price});u.hasInvested=true;
+  upline.forEach((ancestor,index)=>{const level=index+1,rate=referralRates[index];if(!(rate>0))return;const commission=Math.round(vip.price*rate/100);if(commission<=0)return;db.referrals.push({id:`ref_${investmentId}_lv${level}`,parrain:ancestor.phone,filleul:currentUser.phone,level,rate,investmentAmount:vip.price,commissionAmount:commission,pendingReward:true,commissionApproved:false,commissionStatus:"pending",date:today(),timestamp:Date.now()});});
+  saveDB(db);currentUser=getUser(currentUser.phone);alert("Investissement enregistré.");refreshAllUI();switchTab("profil");
+ }catch(e){alert(e.message||"Investissement impossible.");}
+};
+window.claimVipDailyReward=function(investmentId){
+ if(!currentUser||currentUser.phone===ADMIN_PHONE){alert("Action impossible.");return;}
+ try{
+  const db=loadDB();const u=db.users[currentUser.phone];if(!u)throw new Error("Compte introuvable.");
+  const investments=u.activeInvestments||[];const idx=investments.findIndex(v=>String(v.id)===String(investmentId));if(idx<0)throw new Error("Plan introuvable.");
+  const inv=investments[idx];const days=Number(inv.days)||0,daily=Number(inv.daily)||0,paidDays=Math.max(0,Number(inv.paidDays)||0);
+  if(paidDays>=days)throw new Error("Plan terminé.");
+  const fmt=d=>{const a=new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Abidjan",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);const p=Object.fromEntries(a.filter(x=>x.type!=="literal").map(x=>[x.type,x.value]));return `${p.year}-${p.month}-${p.day}`;};
+  const todayStr=fmt(new Date());if(todayStr<=fmt(new Date(Number(inv.purchasedAt)||0)))throw new Error("Disponible demain.");
+  if(inv.lastClaimDate===todayStr)throw new Error("Déjà réclamé aujourd'hui.");
+  const amount=Math.round(daily);u.withdrawBalance=Number(u.withdrawBalance||0)+amount;
+  investments[idx]={...inv,paidDays:paidDays+1,lastClaimDate:todayStr};u.activeInvestments=investments;
+  u.transactions=appendTx(u,{type:`Revenu VIP ${inv.id}`,amount});saveDB(db);currentUser=getUser(currentUser.phone);
+  alert(`+${money(amount)} FCFA crédités.`);refreshAllUI();
+ }catch(e){alert(e.message||"Impossible.");}
+};
+window.showDepositStep=function(step){step=Number(step);if(![1,2,3].includes(step))step=1;const modal=$("modal-deposit");if(modal){modal.classList.remove("hidden");modal.style.setProperty("display","flex","important");}[1,2,3].forEach(n=>{const el=$("dep-step-"+n);if(!el)return;const active=n===step;el.classList.toggle("hidden",!active);el.style.setProperty("display",active?"block":"none","important");});if(window.updateDepProgress)window.updateDepProgress(step);const title=$("dep-step-status");if(title)title.textContent=`Étape ${step} sur 3`;};
+window.openDepositModal=()=>{const modal=$("modal-deposit");if(!modal)return;modal.classList.remove("hidden");modal.style.display="flex";$("dep-amount").value="";$("dep-proof").value="";$("dep-proof-preview").classList.add("hidden");window.depositProofData=null;window.showDepositStep(1);};
+window.updateDepProgress=n=>{[1,2,3].forEach(i=>{const el=$("dep-progress-"+i);if(el)el.style.backgroundColor=i<=n?"#38bdf8":"#334155";});};
+window.goToDepStep2=()=>{const n=Number($("dep-amount").value);if(!Number.isSafeInteger(n)||n<3000){alert("Minimum 3 000 FCFA.");return;}tempDepositAmount=n;$("dep-final-amount").textContent=money(tempDepositAmount);$("wave-payment-number").textContent=WAVE_PAYMENT_NUMBER;window.showDepositStep(2);};
+window.goToDepStep3=()=>window.showDepositStep(3);window.backToDepStep1=()=>window.showDepositStep(1);window.backToDepStep2=()=>window.showDepositStep(2);
+window.copyWavePaymentNumber=async function(){try{await navigator.clipboard.writeText(WAVE_PAYMENT_NUMBER+"\nAPPLE OF");alert("Numéro et nom copiés.");}catch(e){alert("Copiez : 0596180495 / APPLE OF");}};
+window.previewDepositProof=async function(event){const file=event.target.files&&event.target.files[0];if(!file)return;if(!file.type.startsWith("image/")){alert("Image requise.");return;}if(file.size>8*1024*1024){alert("Max 8 Mo.");return;}try{const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=data;});const c=document.createElement("canvas");const s=Math.min(1,1000/Math.max(img.width,img.height));c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);window.depositProofData=c.toDataURL("image/jpeg",0.68);$("dep-proof-image").src=window.depositProofData;$("dep-proof-preview").classList.remove("hidden");}catch(e){alert("Lecture impossible.");}};
+window.submitDepositRequest=function(){if(!currentUser){alert("Connectez-vous.");return;}if(!window.depositProofData){alert("Ajoutez la capture.");return;}const btn=$("dep-submit-btn");btn.disabled=true;try{const db=loadDB();db.deposits.push({id:"dep_"+uid(),phone:currentUser.phone,paymentMethod:"Wave",operator:"WAVE",amount:safeAmount(tempDepositAmount),status:"pending",proofData:window.depositProofData,timestamp:Date.now(),date:today()});saveDB(db);window.depositProofData=null;closeModal("modal-deposit");alert("Demande envoyée.");refreshAllUI();}catch(e){alert(e.message||"Erreur.");}finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-paper-plane mr-1"></i>Envoyer la demande';}};
+window.openWithdrawModal=()=>{if(!currentUser?.wallet){alert("Enregistrez d'abord votre portefeuille.");openWalletModal();return;}$("modal-withdraw").classList.remove("hidden");};
+window.processWithdraw=function(){if(!currentUser)return;try{const amount=safeAmount($("withdraw-amount").value);if(amount<1000)throw new Error("Minimum 1 000 FCFA.");const db=loadDB();const u=db.users[currentUser.phone];if(!u)throw new Error("Compte introuvable.");if(Number(u.withdrawBalance||0)<amount)throw new Error("Solde insuffisant.");u.withdrawBalance=Number(u.withdrawBalance)-amount;u.transactions=appendTx(u,{type:"Retrait en attente",amount:-amount});db.withdrawals.push({id:uid(),phone:u.phone,amount,op:u.wallet?.op||"WAVE",walletPhone:u.wallet?.phone||"",status:"pending",timestamp:Date.now(),date:today()});saveDB(db);currentUser=getUser(currentUser.phone);closeModal("modal-withdraw");alert("Demande enregistrée.");refreshAllUI();}catch(e){alert(e.message||"Erreur.");}};
+window.openWalletModal=()=>$("modal-wallet").classList.remove("hidden");
+window.saveWallet=function(){if(!currentUser)return;const op=$("wallet-op").value,phone=$("wallet-phone").value.trim();if(phone.length<6){alert("Numéro invalide.");return;}const db=loadDB();const u=db.users[currentUser.phone];if(!u)return;u.wallet={op,phone};saveDB(db);currentUser=getUser(currentUser.phone);closeModal("modal-wallet");alert("Portefeuille enregistré.");refreshAllUI();};
+window.closeModal=id=>$(id).classList.add("hidden");
+window.copyRefLink=async function(){if(!currentUser)return;const link=location.origin+location.pathname+"?ref="+encodeURIComponent(currentUser.phone);try{await navigator.clipboard.writeText(link);alert("Lien copié :\n"+link);}catch{prompt("Copiez :",link);}};
+window.resetPlatformCompletely=function(){if(!confirm("Réinitialiser TOUTE la plateforme ?"))return;if(!confirm("Confirmer suppression totale ?"))return;localStorage.removeItem(STORAGE_KEY);currentUser=null;alert("Plateforme réinitialisée.");location.reload();};
+</script>
+
+
+<script>
+/* Animations d'apparition accessibles, y compris pour les éléments ajoutés ensuite */
+(function(){
+ const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(reduce)return;
+ const observe=()=>{
+  const targets=document.querySelectorAll('#page-dashboard .tab-content:not(.hidden) article, #page-dashboard .tab-content:not(.hidden) .bg-custom-card, #page-dashboard .tab-content:not(.hidden) .rounded-3xl');
+  if(!('IntersectionObserver' in window)){targets.forEach(el=>el.classList.add('apc-visible'));return;}
+  const io=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('apc-visible');io.unobserve(entry.target);}}),{threshold:.08});
+  targets.forEach(el=>{if(!el.classList.contains('apc-reveal')){el.classList.add('apc-reveal');io.observe(el);}});
+ };
+ document.addEventListener('DOMContentLoaded',observe);
+ const mo=new MutationObserver(()=>observe());
+ mo.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class'],childList:true});
+ setTimeout(()=>mo.disconnect(),12000);
+})();
+</script>
+
+</body>
+</html>
